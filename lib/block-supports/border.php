@@ -51,6 +51,9 @@ function gutenberg_apply_border_support( $block_type, $block_attributes ) {
 	$classes = array();
 	$styles  = array();
 
+	$has_border_color_support = gutenberg_has_border_feature_support( $block_type, 'color' );
+	$has_border_width_support = gutenberg_has_border_feature_support( $block_type, 'width' );
+
 	// Border radius.
 	if (
 		gutenberg_has_border_feature_support( $block_type, 'radius' ) &&
@@ -86,7 +89,7 @@ function gutenberg_apply_border_support( $block_type, $block_attributes ) {
 
 	// Border width.
 	if (
-		gutenberg_has_border_feature_support( $block_type, 'width' ) &&
+		$has_border_color_support &&
 		isset( $block_attributes['style']['border']['width'] )
 	) {
 		$border_width = $block_attributes['style']['border']['width'];
@@ -100,7 +103,7 @@ function gutenberg_apply_border_support( $block_type, $block_attributes ) {
 	}
 
 	// Border color.
-	if ( gutenberg_has_border_feature_support( $block_type, 'color' ) ) {
+	if ( $has_border_width_support ) {
 		$has_named_border_color  = array_key_exists( 'borderColor', $block_attributes );
 		$has_custom_border_color = isset( $block_attributes['style']['border']['color'] );
 
@@ -116,6 +119,18 @@ function gutenberg_apply_border_support( $block_type, $block_attributes ) {
 		}
 	}
 
+	// Generate styles for individual border sides.
+	if ( $has_border_color_support || $has_border_width_support ) {
+		$sides = array( 'top', 'right', 'bottom', 'left' );
+		foreach ( $sides  as $side ) {
+			$border = _wp_array_get( $block_attributes, array( 'style', 'border', $side ), false );
+
+			if ( is_array( $border ) && ! empty( $border ) ) {
+				$styles[] = gutenberg_generate_individual_border_style( $side, $border );
+			}
+		}
+	}
+
 	// Collect classes and styles.
 	$attributes = array();
 
@@ -128,6 +143,33 @@ function gutenberg_apply_border_support( $block_type, $block_attributes ) {
 	}
 
 	return $attributes;
+}
+
+/**
+ * Generates shorthand CSS style for an individual side border.
+ *
+ * @param string $side   The side the style is being generated for.
+ * @param array  $border Array containing border color, style, and width values.
+ *
+ * @return string Shorthand CSS border style.
+ */
+function gutenberg_generate_individual_border_style( $side, $border ) {
+	$styles = array();
+
+	if ( isset( $border['width'] ) && null !== $border['width'] ) {
+		$styles[] = $border['width'];
+	}
+
+	if ( isset( $border['style'] ) && null !== $border['style'] ) {
+		$styles[] = $border['style'];
+	}
+
+	if ( isset( $border['color'] ) && null !== $border['color'] ) {
+		$styles[] = $border['color'];
+	}
+
+	$style = implode( ' ', $styles );
+	return sprintf( 'border-%s: %s;', $side, $style );
 }
 
 /**
