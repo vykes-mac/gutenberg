@@ -34,16 +34,19 @@ export default function save( { attributes } ) {
 		customOverlayColor,
 		dimRatio,
 		focalPoint,
+		useFeaturedImage,
 		hasParallax,
 		isDark,
 		isRepeated,
 		overlayColor,
-		url,
 		alt,
 		id,
 		minHeight: minHeightProp,
 		minHeightUnit,
 	} = attributes;
+
+	let { url } = attributes;
+
 	const overlayColorClass = getColorClassName(
 		'background-color',
 		overlayColor
@@ -90,6 +93,10 @@ export default function save( { attributes } ) {
 	);
 
 	const gradientValue = gradient || customGradient;
+
+	if ( useFeaturedImage ) {
+		url = 'WordPress://featured-image';
+	}
 
 	return (
 		<div { ...useBlockProps.save( { className: classes, style } ) }>

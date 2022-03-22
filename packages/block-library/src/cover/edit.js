@@ -9,6 +9,7 @@ import namesPlugin from 'colord/plugins/names';
 /**
  * WordPress dependencies
  */
+import { useEntityProp, store as coreStore } from '@wordpress/core-data';
 import {
 	Fragment,
 	useEffect,
@@ -28,6 +29,7 @@ import {
 	Spinner,
 	TextareaControl,
 	ToggleControl,
+	ToolbarButton,
 	__experimentalUseCustomUnits as useCustomUnits,
 	__experimentalBoxControl as BoxControl,
 	__experimentalToolsPanelItem as ToolsPanelItem,
@@ -54,7 +56,7 @@ import {
 } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { cover as icon } from '@wordpress/icons';
+import { postFeaturedImage, cover as icon } from '@wordpress/icons';
 import { isBlobURL } from '@wordpress/blob';
 import { store as noticesStore } from '@wordpress/notices';
 
@@ -298,10 +300,12 @@ function CoverEdit( {
 	setAttributes,
 	setOverlayColor,
 	toggleSelection,
+	context: { postId, postType },
 } ) {
 	const {
 		contentPosition,
 		id,
+		useFeaturedImage,
 		backgroundType,
 		dimRatio,
 		focalPoint,
@@ -316,6 +320,38 @@ function CoverEdit( {
 		allowedBlocks,
 		templateLock,
 	} = attributes;
+
+	const [ featuredImage ] = useEntityProp(
+		'postType',
+		postType,
+		'featured_media',
+		postId
+	);
+
+	const media = useSelect(
+		( select ) =>
+			featuredImage &&
+			select( coreStore ).getMedia( featuredImage, { context: 'view' } ),
+		[ featuredImage ]
+	);
+	const mediaUrl = media?.source_url;
+
+	useEffect( () => {
+		// we use the featured image and it has changed
+		if ( mediaUrl && mediaUrl !== url && useFeaturedImage ) {
+			setAttributes( { url: mediaUrl } );
+		}
+		// we don't use the featured image
+		// so we rest the URL only if it is
+		// the url of the featured image
+		// this is needed to not reset the url
+		// when a new image is selected from the
+		// media library.
+		if ( mediaUrl && ! useFeaturedImage && mediaUrl === url ) {
+			setAttributes( { url: null } );
+		}
+	}, [ mediaUrl, useFeaturedImage ] );
+
 	const { __unstableMarkNextChangeAsNotPersistent } = useDispatch(
 		blockEditorStore
 	);
@@ -371,6 +407,12 @@ function CoverEdit( {
 	const toggleIsRepeated = () => {
 		setAttributes( {
 			isRepeated: ! isRepeated,
+		} );
+	};
+
+	const toggleUseFeaturedImage = () => {
+		setAttributes( {
+			useFeaturedImage: ! useFeaturedImage,
 		} );
 	};
 
@@ -458,6 +500,16 @@ function CoverEdit( {
 				/>
 			</BlockControls>
 			<BlockControls group="other">
+				{ !! postId && (
+					<ToolbarButton
+						icon={ postFeaturedImage /*this is temporary*/ }
+						label={ __( 'Use featured image' ) }
+						isPressed={ useFeaturedImage }
+						onClick={ () => {
+							toggleUseFeaturedImage();
+						} }
+					/>
+				) }
 				<MediaReplaceFlow
 					mediaId={ id }
 					mediaURL={ url }
