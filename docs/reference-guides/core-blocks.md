@@ -168,7 +168,7 @@ Contains the block elements used to render a comment, like the title, date, auth
 -	**Name:** core/comment-template
 -	**Category:** design
 -	**Supports:** align, ~~html~~, ~~reusable~~
--	**Attributes:** likes
+-	**Attributes:** 
 
 ## Comments Pagination
 
