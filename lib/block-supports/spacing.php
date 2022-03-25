@@ -51,7 +51,7 @@ function gutenberg_apply_spacing_support( $block_type, $block_attributes ) {
 		return $attributes;
 	}
 
-	$style_engine                    = WP_Style_Engine_Gutenberg::get_instance();
+	$style_engine                    = gutenberg_get_style_engine();
 	$spacing_block_styles            = array();
 	$spacing_block_styles['padding'] = $has_padding_support ? _wp_array_get( $block_styles, array( 'spacing', 'padding' ), null ) : null;
 	$spacing_block_styles['margin']  = $has_margin_support ? _wp_array_get( $block_styles, array( 'spacing', 'margin' ), null ) : null;
