@@ -321,6 +321,8 @@ function CoverEdit( {
 		templateLock,
 	} = attributes;
 
+	const coverImage = useRef( url );
+
 	const [ featuredImage ] = useEntityProp(
 		'postType',
 		postType,
@@ -337,18 +339,30 @@ function CoverEdit( {
 	const mediaUrl = media?.source_url;
 
 	useEffect( () => {
-		// we use the featured image and it has changed
+		// Save the currently set image
+		if ( useFeaturedImage && url ) {
+			coverImage.current = url;
+		}
+
+		// The featured image is in use and it has changed
 		if ( mediaUrl && mediaUrl !== url && useFeaturedImage ) {
 			setAttributes( { url: mediaUrl } );
 		}
-		// we don't use the featured image
-		// so we rest the URL only if it is
-		// the url of the featured image
-		// this is needed to not reset the url
+		// We don't use the featured image
+		// so we reset the URL only if it is
+		// the url of the featured image.
+		// This is needed to not reset the url
 		// when a new image is selected from the
 		// media library.
 		if ( mediaUrl && ! useFeaturedImage && mediaUrl === url ) {
 			setAttributes( { url: null } );
+		}
+		// Use the initial image, if set, if featuref image
+		// is toggled off
+		if ( ! useFeaturedImage && coverImage.current ) {
+			setAttributes( {
+				url: coverImage.current,
+			} );
 		}
 	}, [ mediaUrl, useFeaturedImage ] );
 
