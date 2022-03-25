@@ -4,7 +4,8 @@
 
 ### Enhancements
 
-- Update `BorderControl` and `BorderBoxControl` to allow the passing of custom class names to popovers ([#39753](https://github.com/WordPress/gutenberg/pull/39753)).
+-   Update `BorderControl` and `BorderBoxControl` to allow the passing of custom class names to popovers ([#39753](https://github.com/WordPress/gutenberg/pull/39753)).
+-   `ToggleGroupControlOption`: Add `icon` support ([#39760](https://github.com/WordPress/gutenberg/pull/39760)).
 
 ### Internal
 
