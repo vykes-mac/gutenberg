@@ -37,7 +37,7 @@ function render_block_core_cover( $attributes, $content ) {
 
 	if( $isImageBackground && $isImgElement ) {
 		$objectPosition = '';
-		if ( $attributes['focalPoint'] ) {
+		if ( isset( $attributes['focalPoint'] ) ) {
 			$objectPosition = round( $attributes['focalPoint']['x'] * 100 ) . '%'. ' ' .
 			round( $attributes['focalPoint']['x'] * 100 ) . '%';
 		}

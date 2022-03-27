@@ -63,13 +63,14 @@ export function attributesFromMedia( setAttributes, dimRatio ) {
 			}
 			mediaType = media.type;
 		}
-
 		setAttributes( {
 			dimRatio: dimRatio === 100 ? 50 : dimRatio,
 			url: media.url,
 			id: media.id,
 			alt: media?.alt,
-			useFeaturedImage: false,
+			useFeaturedImage: media?.isFeaturedImage
+				? media?.isFeaturedImage
+				: false,
 			backgroundType: mediaType,
 			...( mediaType === VIDEO_BACKGROUND_TYPE
 				? { focalPoint: undefined, hasParallax: undefined }

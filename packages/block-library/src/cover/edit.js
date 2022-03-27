@@ -321,7 +321,11 @@ function CoverEdit( {
 		templateLock,
 	} = attributes;
 
-	const coverImage = useRef( url );
+	const coverImage = useRef( {
+		url,
+		type: backgroundType,
+		isFeaturedImage: useFeaturedImage,
+	} );
 
 	const [ featuredImage ] = useEntityProp(
 		'postType',
@@ -341,12 +345,20 @@ function CoverEdit( {
 	useEffect( () => {
 		// Save the currently set image
 		if ( useFeaturedImage && url ) {
-			coverImage.current = url;
+			coverImage.current = {
+				url,
+				type: backgroundType,
+				isFeaturedImage: false,
+			};
 		}
 
 		// The featured image is in use and it has changed
 		if ( mediaUrl && mediaUrl !== url && useFeaturedImage ) {
-			setAttributes( { url: mediaUrl } );
+			onSelectMedia( {
+				url: mediaUrl,
+				type: IMAGE_BACKGROUND_TYPE,
+				isFeaturedImage: true,
+			} );
 		}
 		// We don't use the featured image
 		// so we reset the URL only if it is
@@ -358,11 +370,9 @@ function CoverEdit( {
 			setAttributes( { url: null } );
 		}
 		// Use the initial image, if set, if featuref image
-		// is toggled off
-		if ( ! useFeaturedImage && coverImage.current ) {
-			setAttributes( {
-				url: coverImage.current,
-			} );
+		// is toggled off, but respect if cleared media
+		if ( url && ! useFeaturedImage && coverImage.current ) {
+			onSelectMedia( coverImage.current );
 		}
 	}, [ mediaUrl, useFeaturedImage ] );
 
@@ -524,14 +534,16 @@ function CoverEdit( {
 						} }
 					/>
 				) }
-				<MediaReplaceFlow
-					mediaId={ id }
-					mediaURL={ url }
-					allowedTypes={ ALLOWED_MEDIA_TYPES }
-					accept="image/*,video/*"
-					onSelect={ onSelectMedia }
-					name={ ! url ? __( 'Add Media' ) : __( 'Replace' ) }
-				/>
+				{ ! useFeaturedImage && (
+					<MediaReplaceFlow
+						mediaId={ id }
+						mediaURL={ url }
+						allowedTypes={ ALLOWED_MEDIA_TYPES }
+						accept="image/*,video/*"
+						onSelect={ onSelectMedia }
+						name={ ! url ? __( 'Add Media' ) : __( 'Replace' ) }
+					/>
+				) }
 			</BlockControls>
 			<InspectorControls>
 				{ !! url && (
@@ -599,6 +611,7 @@ function CoverEdit( {
 										focalPoint: undefined,
 										hasParallax: undefined,
 										isRepeated: undefined,
+										useFeaturedImage: false,
 									} )
 								}
 							>
