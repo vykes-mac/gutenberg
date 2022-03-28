@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useCallback, useState } from '@wordpress/element';
+import { useCallback, useRef } from '@wordpress/element';
 import { useThrottle } from '@wordpress/compose';
 
 /**
@@ -11,6 +11,7 @@ import { useThrottle } from '@wordpress/compose';
 import { store as blockEditorStore } from '../../store';
 import { useBlockListContext } from '../block-list/block-list-context';
 import { getDistanceToNearestEdge } from '../../utils/math';
+import useOnBlockDrop from '../use-on-block-drop';
 
 export function getNearestBlockIndex(
 	blocksLayouts,
@@ -73,8 +74,7 @@ export default function useBlockDropZone( {
 	// an empty string to represent top-level blocks.
 	rootClientId: targetRootClientId = '',
 } = {} ) {
-	// eslint-disable-next-line no-unused-vars
-	const [ targetBlockIndex, setTargetBlockIndex ] = useState( null );
+	const targetBlockIndex = useRef( null );
 
 	const { getBlockListSettings, getSettings } = useSelect( blockEditorStore );
 	const { showInsertionPoint, hideInsertionPoint } = useDispatch(
@@ -91,7 +91,8 @@ export default function useBlockDropZone( {
 
 	const isRTL = getSettings().isRTL;
 
-	//const onBlockDrop = useOnBlockDrop( targetRootClientId, targetBlockIndex );
+	const onBlockDrop = useOnBlockDrop();
+
 	const throttled = useThrottle(
 		useCallback(
 			( event ) => {
@@ -103,9 +104,9 @@ export default function useBlockDropZone( {
 					getBlockListSettings( targetRootClientId )?.orientation,
 					isRTL
 				);
-				//setTargetBlockIndex( targetIndex === undefined ? 0 : targetIndex );
 				if ( targetIndex !== null ) {
 					showInsertionPoint( targetRootClientId, targetIndex );
+					targetBlockIndex.current = targetIndex ?? 0;
 				}
 			},
 			[ getSortedBlocksLayouts ]
@@ -120,7 +121,16 @@ export default function useBlockDropZone( {
 		onBlockDragEnd() {
 			throttled.cancel();
 			hideInsertionPoint();
-			setTargetBlockIndex( null );
+			targetBlockIndex.current = null;
+		},
+		onBlockDrop: ( event ) => {
+			if ( targetBlockIndex.current !== null ) {
+				onBlockDrop( {
+					...event,
+					targetRootClientId,
+					targetBlockIndex: targetBlockIndex.current,
+				} );
+			}
 		},
 	};
 }
