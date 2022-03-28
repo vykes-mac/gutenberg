@@ -18,7 +18,7 @@ import Animated, {
  */
 import { Draggable } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -37,6 +37,8 @@ const EXTRA_OFFSET_WHEN_CLOSE_TO_TOP_EDGE = 80;
 const SCROLL_ANIMATION_DURATION = 350;
 
 const BlockDraggableWrapper = ( { children } ) => {
+	const currentClientId = useRef();
+
 	const { startDraggingBlocks, stopDraggingBlocks } = useDispatch(
 		blockEditorStore
 	);
@@ -96,6 +98,7 @@ const BlockDraggableWrapper = ( { children } ) => {
 		} );
 
 		const foundClientId = blockLayout?.clientId;
+		currentClientId.current = foundClientId;
 		if ( foundClientId ) {
 			startDraggingBlocks( [ foundClientId ] );
 
