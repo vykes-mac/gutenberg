@@ -352,6 +352,20 @@ function CoverEdit( {
 			};
 		}
 
+		// If the useFeaturedImage attribute is set
+		// but there is no featured media on the post
+		// we reset the media
+		if ( useFeaturedImage && ! mediaUrl ) {
+			setAttributes( {
+				url: undefined,
+				id: undefined,
+				backgroundType: undefined,
+				focalPoint: undefined,
+				hasParallax: undefined,
+				isRepeated: undefined,
+			} );
+		}
+
 		// The featured image is in use and it has changed
 		if ( mediaUrl && mediaUrl !== url && useFeaturedImage ) {
 			onSelectMedia( {
